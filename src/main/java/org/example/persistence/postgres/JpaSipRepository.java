@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 
-@Profile({"qa", "prod"})
+@Profile({"local", "qa", "prod"})
 public interface JpaSipRepository extends JpaRepository<SipEntity, String> {
 
     List<SipEntity> findByUserId(String userId);

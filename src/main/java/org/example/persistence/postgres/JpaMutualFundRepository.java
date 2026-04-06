@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
 
-@Profile({"qa", "prod"})
+@Profile({"local", "qa", "prod"})
 public interface JpaMutualFundRepository extends JpaRepository<MutualFundEntity, String> {
 
     @Modifying

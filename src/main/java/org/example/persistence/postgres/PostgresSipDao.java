@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-@Profile({"qa", "prod"})
+@Profile({"local", "qa", "prod"})
 @RequiredArgsConstructor
 public class PostgresSipDao implements SipDao {
 

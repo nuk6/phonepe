@@ -1,13 +1,11 @@
 package org.example.persistence.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.model.MutualFund;
+import org.example.model.MutualFundCategory;
 
 import java.math.BigDecimal;
 
@@ -24,8 +22,9 @@ public class MutualFundEntity {
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String category;
+    private MutualFundCategory category;
 
     @Column(name = "current_nav", nullable = false)
     private BigDecimal currentNav;

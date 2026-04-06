@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-@Profile({"qa", "prod"})
+@Profile({"local", "qa", "prod"})
 public interface JpaSipInstallmentRepository extends JpaRepository<SipInstallmentEntity, String> {
 
     List<SipInstallmentEntity> findBySipId(String sipId);

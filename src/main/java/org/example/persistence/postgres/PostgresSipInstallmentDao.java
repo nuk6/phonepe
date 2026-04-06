@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-@Profile({"qa", "prod"})
+@Profile({"local", "qa", "prod"})
 @RequiredArgsConstructor
 public class PostgresSipInstallmentDao implements SipInstallmentDao {
 

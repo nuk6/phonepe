@@ -14,7 +14,7 @@ public class MutualFund {
 
     private final String id;
     private final String name;
-    private final String category;
+    private final MutualFundCategory category;
     @Setter
     private BigDecimal currentNav;
 }

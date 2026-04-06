@@ -3,6 +3,7 @@ package org.example.config;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.model.MutualFund;
+import org.example.model.MutualFundCategory;
 import org.example.model.User;
 import org.example.persistence.MutualFundDao;
 import org.example.persistence.UserDao;
@@ -25,11 +26,11 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
         List<MutualFund> funds = List.of(
-                new MutualFund("MF001", "HDFC Flexi Cap Fund", "Equity", new BigDecimal("25.50")),
-                new MutualFund("MF002", "ICICI Prudential Bluechip Fund", "Equity", new BigDecimal("72.30")),
-                new MutualFund("MF003", "SBI Magnum Gilt Fund", "Debt", new BigDecimal("48.10")),
-                new MutualFund("MF004", "Axis Liquid Fund", "Debt", new BigDecimal("2400.75")),
-                new MutualFund("MF005", "Kotak Balanced Advantage Fund", "Hybrid", new BigDecimal("15.80"))
+                new MutualFund("MF001", "HDFC Flexi Cap Fund", MutualFundCategory.EQUITY, new BigDecimal("25.50")),
+                new MutualFund("MF002", "ICICI Prudential Bluechip Fund", MutualFundCategory.EQUITY, new BigDecimal("72.30")),
+                new MutualFund("MF003", "SBI Magnum Gilt Fund", MutualFundCategory.EQUITY, new BigDecimal("48.10")),
+                new MutualFund("MF004", "Axis Liquid Fund", MutualFundCategory.DEBT, new BigDecimal("2400.75")),
+                new MutualFund("MF005", "Kotak Balanced Advantage Fund", MutualFundCategory.HYBRID, new BigDecimal("15.80"))
         );
         funds.forEach(mutualFundDao::save);
 
