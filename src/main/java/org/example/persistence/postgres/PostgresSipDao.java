@@ -45,9 +45,14 @@ public class PostgresSipDao implements SipDao {
 
     @Override
     public List<Sip> findDueForExecution(LocalDate date) {
-        return jpaRepo.findDueForExecution(date).stream()
+        return jpaRepo.findDueForExecution(SipState.ACTIVE, date).stream()
                 .map(SipEntity::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Optional<Sip> findByIdForUpdate(String sipId) {
+        return jpaRepo.findByIdForUpdate(sipId).map(SipEntity::toDomain);
     }
 
     @Override

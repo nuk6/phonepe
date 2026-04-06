@@ -1,6 +1,5 @@
 package org.example.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,10 +7,10 @@ import org.example.enums.InstallmentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @ToString
-@AllArgsConstructor
 public class SipInstallment {
 
     private final String id;
@@ -22,5 +21,23 @@ public class SipInstallment {
     private final LocalDate executionDate;
     @Setter
     private InstallmentStatus status;
+    private final String idempotencyKey;
+    @Setter
+    private LocalDateTime createdAt;
+
+    public SipInstallment(String id, String sipId, BigDecimal amount,
+                          BigDecimal nav, BigDecimal unitsAllotted,
+                          LocalDate executionDate, InstallmentStatus status,
+                          String idempotencyKey) {
+        this.id = id;
+        this.sipId = sipId;
+        this.amount = amount;
+        this.nav = nav;
+        this.unitsAllotted = unitsAllotted;
+        this.executionDate = executionDate;
+        this.status = status;
+        this.idempotencyKey = idempotencyKey;
+        this.createdAt = LocalDateTime.now();
+    }
 }
 

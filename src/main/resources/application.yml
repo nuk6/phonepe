@@ -5,3 +5,43 @@ spring:
 server:
   port: 8080
 
+resilience4j:
+
+  # CIRCUIT BREAKER — "is the payment service healthy?"
+  # Tracks recent call outcomes. If too many fail, stop calling entirely.
+  circuitbreaker:
+    instances:
+      paymentGateway:
+        sliding-window-size: 10                          # look at last 10 calls
+        failure-rate-threshold: 50                       # if 50%+ failed, open circuit
+        wait-duration-in-open-state: 30s                 # stay open for 30s, then try again
+        permitted-number-of-calls-in-half-open-state: 3  # allow 3 test calls in half-open
+        sliding-window-type: COUNT_BASED                 # count-based, not time-based
+        register-health-indicator: true                  # expose in /actuator/health
+
+  # RETRY — transient failures (network blip, 503)
+  # Retries the call before giving up. Safe because of idempotency keys.
+  retry:
+    instances:
+      paymentGateway:
+        max-attempts: 3                                  # original + 2 retries
+        wait-duration: 500ms                             # wait between retries
+        retry-exceptions:
+          - java.lang.RuntimeException
+
+  # BULKHEAD — "how many threads can payment calls consume?"
+  # Prevents a slow payment service from eating all your threads.
+  # Without this, if payment takes 10s and 100 SIPs execute,
+  # all 100 threads are blocked → your entire app is unresponsive.
+  bulkhead:
+    instances:
+      paymentGateway:
+        max-concurrent-calls: 10                         # max 10 payment calls at once
+        max-wait-duration: 500ms                         # wait 500ms for a permit, then reject
+
+  # TIME LIMITER — hard timeout per call
+  timelimiter:
+    instances:
+      paymentGateway:
+        timeout-duration: 5s
+

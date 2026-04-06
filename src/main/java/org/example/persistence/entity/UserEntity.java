@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.model.User;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -22,10 +24,18 @@ public class UserEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     public static UserEntity fromDomain(User user) {
         UserEntity entity = new UserEntity();
         entity.setId(user.getId());
         entity.setName(user.getName());
+        entity.setCreatedAt(LocalDateTime.now());
+        entity.setUpdatedAt(LocalDateTime.now());
         return entity;
     }
 

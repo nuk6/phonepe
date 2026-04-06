@@ -8,6 +8,7 @@ import org.example.enums.SipState;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @ToString
@@ -28,6 +29,12 @@ public class Sip {
     private final double stepUpPercentage;
     @Setter
     private int installmentCount;
+    @Setter
+    private int version;
+    @Setter
+    private LocalDateTime createdAt;
+    @Setter
+    private LocalDateTime updatedAt;
 
     public Sip(String id, String userId, String fundId, BigDecimal amount,
                SipMode mode, LocalDate startDate, double stepUpPercentage) {
@@ -42,6 +49,9 @@ public class Sip {
         this.nextExecutionDate = startDate;
         this.stepUpPercentage = stepUpPercentage;
         this.installmentCount = 0;
+        this.version = 0;
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
     public void incrementInstallmentCount() {

@@ -7,6 +7,7 @@ import org.example.exception.SipError;
 import org.example.exception.UserError;
 import org.example.exception.FundError;
 import org.example.model.MutualFund;
+import org.example.model.MutualFundCategory;
 import org.example.model.Sip;
 import org.example.model.SipInstallment;
 import org.example.model.User;
@@ -37,12 +38,12 @@ class SipServiceTest {
         fundDao = new InMemoryMutualFundDao();
         userDao = new InMemoryUserDao();
         installmentDao = new InMemorySipInstallmentDao();
-        PaymentGateway pg = (userId, amount) -> true; // always succeeds
+        PaymentGateway pg = (userId, amount, key) -> true; // always succeeds
 
         sipService = new SipService(sipDao, installmentDao, fundDao, userDao, pg);
 
         userDao.save(new User("u1", "Rahul"));
-        fundDao.save(new MutualFund("f1", "HDFC Flexi Cap", "Equity", new BigDecimal("50.00")));
+        fundDao.save(new MutualFund("f1", "HDFC Flexi Cap", MutualFundCategory.EQUITY, new BigDecimal("50.00")));
     }
 
     // --- create ---

@@ -1,7 +1,7 @@
 package org.example.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.model.MutualFund;
+import org.example.dto.MutualFundResponse;
 import org.example.service.MutualFundService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,18 +20,20 @@ public class MutualFundController {
     private final MutualFundService mutualFundService;
 
     @GetMapping
-    public ResponseEntity<List<MutualFund>> getAllFunds() {
-        return ResponseEntity.ok(mutualFundService.getAllFunds());
+    public ResponseEntity<List<MutualFundResponse>> getAllFunds() {
+        return ResponseEntity.ok(mutualFundService.getAllFunds().stream()
+                .map(MutualFundResponse::from).toList());
     }
 
     @GetMapping("/{fundId}")
-    public ResponseEntity<MutualFund> getFundById(@PathVariable String fundId) {
-        return ResponseEntity.ok(mutualFundService.getFundById(fundId));
+    public ResponseEntity<MutualFundResponse> getFundById(@PathVariable String fundId) {
+        return ResponseEntity.ok(MutualFundResponse.from(mutualFundService.getFundById(fundId)));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<MutualFund>> searchByCategory(@RequestParam String category) {
-        return ResponseEntity.ok(mutualFundService.searchByCategory(category));
+    public ResponseEntity<List<MutualFundResponse>> searchByCategory(@RequestParam String category) {
+        return ResponseEntity.ok(mutualFundService.searchByCategory(category).stream()
+                .map(MutualFundResponse::from).toList());
     }
 }
 

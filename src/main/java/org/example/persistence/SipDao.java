@@ -13,6 +13,11 @@ public interface SipDao {
 
     Optional<Sip> findById(String sipId);
 
+    /** Acquires a row-level lock in DB implementations. Falls back to findById for in-memory. */
+    default Optional<Sip> findByIdForUpdate(String sipId) {
+        return findById(sipId);
+    }
+
     List<Sip> findByUserId(String userId);
 
     List<Sip> findByState(SipState state);

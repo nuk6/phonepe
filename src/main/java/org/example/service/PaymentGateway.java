@@ -4,6 +4,6 @@ import java.math.BigDecimal;
 
 public interface PaymentGateway {
 
-    boolean initiatePayment(String userId, BigDecimal amount);
+    boolean initiatePayment(String userId, BigDecimal amount, String idempotencyKey);
 }
 

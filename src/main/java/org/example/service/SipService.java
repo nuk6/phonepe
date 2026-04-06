@@ -17,6 +17,7 @@ import org.example.persistence.SipDao;
 import org.example.persistence.SipInstallmentDao;
 import org.example.persistence.UserDao;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -98,6 +99,7 @@ public class SipService {
      * Lump sum payment covers missed installments for a paused SIP.
      * After payment, the SIP is reactivated with next execution date set from today.
      */
+    @Transactional
     public List<SipInstallment> lumpSumPayment(String sipId, int missedInstallments) {
         Sip sip = getSipOrThrow(sipId);
         if (sip.getState() == SipState.STOPPED) {
@@ -122,7 +124,8 @@ public class SipService {
             }
         }
 
-        boolean paid = paymentGateway.initiatePayment(sip.getUserId(), totalAmount);
+        String lumpSumKey = sipId + "_lumpsum_" + System.currentTimeMillis();
+        boolean paid = paymentGateway.initiatePayment(sip.getUserId(), totalAmount, lumpSumKey);
         if (!paid) {
             throw new PhonePeRuntimeException(PaymentError.PAYMENT_FAILED);
         }
@@ -131,10 +134,11 @@ public class SipService {
         List<SipInstallment> installments = new ArrayList<>();
 
         for (int i = 0; i < missedInstallments; i++) {
+            String idempotencyKey = sipId + "_lumpsum_" + sip.getInstallmentCount();
             BigDecimal units = amounts[i].divide(nav, 4, RoundingMode.HALF_UP);
             SipInstallment inst = new SipInstallment(
                     UUID.randomUUID().toString(), sipId, amounts[i],
-                    nav, units, LocalDate.now(), InstallmentStatus.SUCCESS
+                    nav, units, LocalDate.now(), InstallmentStatus.SUCCESS, idempotencyKey
             );
             installmentDao.save(inst);
             installments.add(inst);

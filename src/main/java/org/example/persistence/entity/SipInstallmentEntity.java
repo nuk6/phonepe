@@ -14,6 +14,7 @@ import org.example.model.SipInstallment;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sip_installments")
@@ -44,6 +45,12 @@ public class SipInstallmentEntity {
     @Column(nullable = false)
     private InstallmentStatus status;
 
+    @Column(name = "idempotency_key", unique = true)
+    private String idempotencyKey;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     public static SipInstallmentEntity fromDomain(SipInstallment inst) {
         SipInstallmentEntity e = new SipInstallmentEntity();
         e.setId(inst.getId());
@@ -53,11 +60,16 @@ public class SipInstallmentEntity {
         e.setUnitsAllotted(inst.getUnitsAllotted());
         e.setExecutionDate(inst.getExecutionDate());
         e.setStatus(inst.getStatus());
+        e.setIdempotencyKey(inst.getIdempotencyKey());
+        e.setCreatedAt(inst.getCreatedAt());
         return e;
     }
 
     public SipInstallment toDomain() {
-        return new SipInstallment(id, sipId, amount, nav, unitsAllotted, executionDate, status);
+        SipInstallment inst = new SipInstallment(id, sipId, amount, nav,
+                unitsAllotted, executionDate, status, idempotencyKey);
+        inst.setCreatedAt(this.createdAt);
+        return inst;
     }
 }
 

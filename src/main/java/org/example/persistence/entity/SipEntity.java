@@ -6,6 +6,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,6 +16,7 @@ import org.example.model.Sip;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "sips")
@@ -58,6 +60,15 @@ public class SipEntity {
     @Column(name = "installment_count", nullable = false)
     private int installmentCount;
 
+    @Version
+    private int version;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     public static SipEntity fromDomain(Sip sip) {
         SipEntity e = new SipEntity();
         e.setId(sip.getId());
@@ -71,6 +82,9 @@ public class SipEntity {
         e.setNextExecutionDate(sip.getNextExecutionDate());
         e.setStepUpPercentage(sip.getStepUpPercentage());
         e.setInstallmentCount(sip.getInstallmentCount());
+        e.setVersion(sip.getVersion());
+        e.setCreatedAt(sip.getCreatedAt());
+        e.setUpdatedAt(LocalDateTime.now());
         return e;
     }
 
@@ -80,6 +94,9 @@ public class SipEntity {
         sip.setState(this.state);
         sip.setNextExecutionDate(this.nextExecutionDate);
         sip.setInstallmentCount(this.installmentCount);
+        sip.setVersion(this.version);
+        sip.setCreatedAt(this.createdAt);
+        sip.setUpdatedAt(this.updatedAt);
         return sip;
     }
 }

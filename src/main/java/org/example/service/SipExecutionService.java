@@ -13,6 +13,7 @@ import org.example.persistence.MutualFundDao;
 import org.example.persistence.SipDao;
 import org.example.persistence.SipInstallmentDao;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -37,7 +38,7 @@ public class SipExecutionService {
 
         for (Sip sip : dueSips) {
             try {
-                SipInstallment installment = executeSingleSip(sip, today);
+                SipInstallment installment = executeSingleSip(sip.getId(), today);
                 results.add(installment);
             } catch (PhonePeRuntimeException e) {
                 log.error("Failed to execute SIP {}: {}", sip.getId(), e.getError().getDescription());
@@ -47,24 +48,34 @@ public class SipExecutionService {
         return results;
     }
 
-    private SipInstallment executeSingleSip(Sip sip, LocalDate executionDate) {
+    @Transactional
+    public SipInstallment executeSingleSip(String sipId, LocalDate executionDate) {
+        // re-fetch inside transaction for locking (Postgres DAO uses FOR UPDATE)
+        Sip sip = sipDao.findByIdForUpdate(sipId)
+                .orElseGet(() -> sipDao.findById(sipId)
+                        .orElseThrow(() -> new PhonePeRuntimeException(
+                                org.example.exception.SipError.SIP_NOT_FOUND)));
+
         MutualFund fund = mutualFundDao.findById(sip.getFundId())
                 .orElseThrow(() -> new PhonePeRuntimeException(FundError.FUND_NOT_FOUND));
 
         BigDecimal amount = sip.getAmount();
         BigDecimal nav = fund.getCurrentNav();
 
-        boolean paid = paymentGateway.initiatePayment(sip.getUserId(), amount);
+        // idempotency key = sipId + installmentCount — deterministic, prevents double-charge
+        String idempotencyKey = sipId + "_" + sip.getInstallmentCount();
+
+        boolean paid = paymentGateway.initiatePayment(sip.getUserId(), amount, idempotencyKey);
         if (!paid) {
-            SipInstallment failed = buildInstallment(sip.getId(), amount, nav,
-                    BigDecimal.ZERO, executionDate, InstallmentStatus.FAILED);
+            SipInstallment failed = buildInstallment(sipId, amount, nav,
+                    BigDecimal.ZERO, executionDate, InstallmentStatus.FAILED, idempotencyKey);
             installmentDao.save(failed);
             throw new PhonePeRuntimeException(PaymentError.PAYMENT_FAILED);
         }
 
         BigDecimal units = amount.divide(nav, 4, RoundingMode.HALF_UP);
-        SipInstallment installment = buildInstallment(sip.getId(), amount, nav,
-                units, executionDate, InstallmentStatus.SUCCESS);
+        SipInstallment installment = buildInstallment(sipId, amount, nav,
+                units, executionDate, InstallmentStatus.SUCCESS, idempotencyKey);
         installmentDao.save(installment);
 
         sip.incrementInstallmentCount();
@@ -72,7 +83,7 @@ public class SipExecutionService {
         sip.setNextExecutionDate(SipService.computeNextDate(executionDate, sip.getMode()));
         sipDao.update(sip);
 
-        log.info("Executed SIP {} | amount={} | nav={} | units={}", sip.getId(), amount, nav, units);
+        log.info("Executed SIP {} | amount={} | nav={} | units={}", sipId, amount, nav, units);
         return installment;
     }
 
@@ -87,8 +98,10 @@ public class SipExecutionService {
     }
 
     private SipInstallment buildInstallment(String sipId, BigDecimal amount, BigDecimal nav,
-                                            BigDecimal units, LocalDate date, InstallmentStatus status) {
-        return new SipInstallment(UUID.randomUUID().toString(), sipId, amount, nav, units, date, status);
+                                            BigDecimal units, LocalDate date,
+                                            InstallmentStatus status, String idempotencyKey) {
+        return new SipInstallment(UUID.randomUUID().toString(), sipId, amount,
+                nav, units, date, status, idempotencyKey);
     }
 }
 

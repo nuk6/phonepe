@@ -27,7 +27,7 @@ public class MutualFundService {
 
     public List<MutualFund> searchByCategory(String category) {
         return mutualFundDao.findAll().stream()
-                .filter(fund -> fund.getCategory().name().equals(category))
+                .filter(fund -> fund.getCategory().name().equalsIgnoreCase(category))
                 .collect(Collectors.toList());
     }
 

@@ -4,6 +4,7 @@ import org.example.enums.InstallmentStatus;
 import org.example.enums.SipMode;
 import org.example.enums.SipState;
 import org.example.model.MutualFund;
+import org.example.model.MutualFundCategory;
 import org.example.model.Sip;
 import org.example.model.SipInstallment;
 import org.example.model.User;
@@ -36,13 +37,13 @@ class SipExecutionServiceTest {
         installmentDao = new InMemorySipInstallmentDao();
         InMemoryUserDao userDao = new InMemoryUserDao();
         paymentShouldSucceed = true;
-        PaymentGateway pg = (userId, amount) -> paymentShouldSucceed;
+        PaymentGateway pg = (userId, amount, key) -> paymentShouldSucceed;
 
         sipService = new SipService(sipDao, installmentDao, fundDao, userDao, pg);
         executionService = new SipExecutionService(sipDao, installmentDao, fundDao, pg);
 
         userDao.save(new User("u1", "Amit"));
-        fundDao.save(new MutualFund("f1", "SBI Bluechip", "Equity", new BigDecimal("100.00")));
+        fundDao.save(new MutualFund("f1", "SBI Bluechip", MutualFundCategory.EQUITY, new BigDecimal("100.00")));
     }
 
     @Test

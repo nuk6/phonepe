@@ -5,6 +5,7 @@ import org.example.enums.SipState;
 import org.example.exception.PhonePeRuntimeException;
 import org.example.exception.SipError;
 import org.example.model.MutualFund;
+import org.example.model.MutualFundCategory;
 import org.example.model.Sip;
 import org.example.model.SipInstallment;
 import org.example.model.User;
@@ -35,10 +36,10 @@ class LumpSumPaymentTest {
         InMemorySipInstallmentDao installmentDao = new InMemorySipInstallmentDao();
 
         sipService = new SipService(sipDao, installmentDao, fundDao, userDao,
-                (userId, amount) -> true);
+                (userId, amount, key) -> true);
 
         userDao.save(new User("u1", "Priya"));
-        fundDao.save(new MutualFund("f1", "ICICI Blue", "Equity", new BigDecimal("50.00")));
+        fundDao.save(new MutualFund("f1", "ICICI Blue", MutualFundCategory.EQUITY, new BigDecimal("50.00")));
     }
 
     @Test
