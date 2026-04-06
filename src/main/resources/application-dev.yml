@@ -1,0 +1,10 @@
+# Dev profile — no real DB, in-memory DAOs are used via @Profile("dev")
+# JPA and Flyway disabled since dev runs entirely in-memory
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration
+
