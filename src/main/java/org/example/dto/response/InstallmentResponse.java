@@ -1,8 +1,8 @@
-package org.example.dto;
+package org.example.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
-import org.example.enums.InstallmentStatus;
+import org.example.model.enums.InstallmentStatus;
 import org.example.model.SipInstallment;
 
 import java.math.BigDecimal;

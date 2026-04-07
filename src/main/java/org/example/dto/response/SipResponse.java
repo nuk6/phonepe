@@ -1,9 +1,9 @@
-package org.example.dto;
+package org.example.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
-import org.example.enums.SipMode;
-import org.example.enums.SipState;
+import org.example.model.enums.SipMode;
+import org.example.model.enums.SipState;
 import org.example.model.Sip;
 
 import java.math.BigDecimal;

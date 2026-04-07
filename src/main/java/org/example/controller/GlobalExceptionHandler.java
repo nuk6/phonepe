@@ -1,7 +1,7 @@
 package org.example.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.dto.ErrorResponse;
+import org.example.dto.response.ErrorResponse;
 import org.example.exception.PhonePeRuntimeException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;

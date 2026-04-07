@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.enums.InstallmentStatus;
+import org.example.model.enums.InstallmentStatus;
 import org.example.model.SipInstallment;
 
 import java.math.BigDecimal;

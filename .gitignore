@@ -11,6 +11,7 @@ target/
 .idea/libraries/
 .idea/dataSources.xml
 .idea/sqlDataSources.xml
+.idea/AugmentWebviewStateStore.xml
 *.iws
 *.iml
 *.ipr

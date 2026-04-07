@@ -1,7 +1,7 @@
 package org.example.persistence.postgres;
 
 import jakarta.persistence.LockModeType;
-import org.example.enums.SipState;
+import org.example.model.enums.SipState;
 import org.example.persistence.entity.SipEntity;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.JpaRepository;

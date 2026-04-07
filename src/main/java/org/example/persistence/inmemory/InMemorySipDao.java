@@ -1,11 +1,10 @@
 package org.example.persistence.inmemory;
 
-import org.example.enums.SipState;
+import org.example.model.enums.SipState;
 import org.example.model.Sip;
 import org.example.persistence.SipDao;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

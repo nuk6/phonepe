@@ -2,10 +2,10 @@ package org.example.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.dto.CreateSipRequest;
-import org.example.dto.InstallmentResponse;
-import org.example.dto.LumpSumRequest;
-import org.example.dto.SipResponse;
+import org.example.dto.request.CreateSipRequest;
+import org.example.dto.response.InstallmentResponse;
+import org.example.dto.request.LumpSumRequest;
+import org.example.dto.response.SipResponse;
 import org.example.service.SipExecutionService;
 import org.example.service.SipService;
 import org.springframework.http.HttpStatus;

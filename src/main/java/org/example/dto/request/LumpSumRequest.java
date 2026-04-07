@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.request;
 
 import jakarta.validation.constraints.Min;
 import lombok.Data;

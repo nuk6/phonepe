@@ -1,4 +1,4 @@
-package org.example.dto;
+package org.example.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
-import org.example.enums.SipMode;
+import org.example.model.enums.SipMode;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

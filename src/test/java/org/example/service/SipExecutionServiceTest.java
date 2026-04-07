@@ -1,8 +1,7 @@
 package org.example.service;
 
-import org.example.enums.InstallmentStatus;
-import org.example.enums.SipMode;
-import org.example.enums.SipState;
+import org.example.model.enums.InstallmentStatus;
+import org.example.model.enums.SipMode;
 import org.example.model.MutualFund;
 import org.example.model.MutualFundCategory;
 import org.example.model.Sip;

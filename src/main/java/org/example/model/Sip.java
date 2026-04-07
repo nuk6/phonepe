@@ -3,8 +3,8 @@ package org.example.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.example.enums.SipMode;
-import org.example.enums.SipState;
+import org.example.model.enums.SipMode;
+import org.example.model.enums.SipState;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

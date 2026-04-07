@@ -3,7 +3,7 @@ package org.example.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.example.enums.InstallmentStatus;
+import org.example.model.enums.InstallmentStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

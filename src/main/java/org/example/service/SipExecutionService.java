@@ -2,7 +2,7 @@ package org.example.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.enums.InstallmentStatus;
+import org.example.model.enums.InstallmentStatus;
 import org.example.exception.FundError;
 import org.example.exception.PaymentError;
 import org.example.exception.PhonePeRuntimeException;

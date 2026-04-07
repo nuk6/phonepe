@@ -1,9 +1,9 @@
 package org.example.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.enums.InstallmentStatus;
-import org.example.enums.SipMode;
-import org.example.enums.SipState;
+import org.example.model.enums.InstallmentStatus;
+import org.example.model.enums.SipMode;
+import org.example.model.enums.SipState;
 import org.example.exception.FundError;
 import org.example.exception.PaymentError;
 import org.example.exception.PhonePeRuntimeException;

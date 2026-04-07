@@ -1,7 +1,7 @@
 package org.example.persistence.postgres;
 
 import lombok.RequiredArgsConstructor;
-import org.example.enums.SipState;
+import org.example.model.enums.SipState;
 import org.example.model.Sip;
 import org.example.persistence.SipDao;
 import org.example.persistence.entity.SipEntity;

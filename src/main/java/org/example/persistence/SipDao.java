@@ -1,6 +1,6 @@
 package org.example.persistence;
 
-import org.example.enums.SipState;
+import org.example.model.enums.SipState;
 import org.example.model.Sip;
 
 import java.time.LocalDate;

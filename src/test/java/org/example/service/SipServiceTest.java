@@ -1,7 +1,7 @@
 package org.example.service;
 
-import org.example.enums.SipMode;
-import org.example.enums.SipState;
+import org.example.model.enums.SipMode;
+import org.example.model.enums.SipState;
 import org.example.exception.PhonePeRuntimeException;
 import org.example.exception.SipError;
 import org.example.exception.UserError;
@@ -9,7 +9,6 @@ import org.example.exception.FundError;
 import org.example.model.MutualFund;
 import org.example.model.MutualFundCategory;
 import org.example.model.Sip;
-import org.example.model.SipInstallment;
 import org.example.model.User;
 import org.example.persistence.inmemory.InMemoryMutualFundDao;
 import org.example.persistence.inmemory.InMemorySipDao;

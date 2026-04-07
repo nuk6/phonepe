@@ -10,8 +10,8 @@ import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.enums.SipMode;
-import org.example.enums.SipState;
+import org.example.model.enums.SipMode;
+import org.example.model.enums.SipState;
 import org.example.model.Sip;
 
 import java.math.BigDecimal;

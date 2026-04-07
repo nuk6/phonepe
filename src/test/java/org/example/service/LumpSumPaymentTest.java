@@ -1,7 +1,7 @@
 package org.example.service;
 
-import org.example.enums.SipMode;
-import org.example.enums.SipState;
+import org.example.model.enums.SipMode;
+import org.example.model.enums.SipState;
 import org.example.exception.PhonePeRuntimeException;
 import org.example.exception.SipError;
 import org.example.model.MutualFund;
