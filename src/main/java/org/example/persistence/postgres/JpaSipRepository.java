@@ -26,5 +26,19 @@ public interface JpaSipRepository extends JpaRepository<SipEntity, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT s FROM SipEntity s WHERE s.id = :id")
     Optional<SipEntity> findByIdForUpdate(@Param("id") String id);
+
+    /**
+     * Native query — JPA's @Lock doesn't support SKIP LOCKED.
+     * Each instance grabs a different batch of rows.
+     * Rows locked by another instance are silently skipped.
+     */
+    @Query(value = "SELECT * FROM sips " +
+            "WHERE state = 'ACTIVE' AND next_execution_date <= :date " +
+            "ORDER BY next_execution_date " +
+            "FOR UPDATE SKIP LOCKED " +
+            "LIMIT :batchSize",
+            nativeQuery = true)
+    List<SipEntity> claimDueSipsForExecution(@Param("date") LocalDate date,
+                                            @Param("batchSize") int batchSize);
 }
 

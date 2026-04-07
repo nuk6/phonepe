@@ -24,6 +24,15 @@ public interface SipDao {
 
     List<Sip> findDueForExecution(LocalDate date);
 
+    /**
+     * Fetches a batch of due SIPs with row-level locks, skipping rows already locked
+     * by another instance. Each instance gets a different non-overlapping batch.
+     * Falls back to findDueForExecution for in-memory (single instance).
+     */
+    default List<Sip> claimDueSipsForExecution(LocalDate date, int batchSize) {
+        return findDueForExecution(date);
+    }
+
     void update(Sip sip);
 }
 

@@ -27,18 +27,29 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SipExecutionService {
 
+    private static final int BATCH_SIZE = 50;
+
     private final SipDao sipDao;
     private final SipInstallmentDao installmentDao;
     private final MutualFundDao mutualFundDao;
     private final PaymentGateway paymentGateway;
 
+    /**
+     * Claims a batch of due SIPs using SELECT ... FOR UPDATE SKIP LOCKED.
+     * Each app instance gets a different non-overlapping batch — no two
+     * instances process the same SIP.
+     *
+     * Single batch per call. If there are more due SIPs than BATCH_SIZE,
+     * the next scheduler tick (or another instance) picks them up.
+     */
+    @Transactional
     public List<SipInstallment> executeAllDueSips(LocalDate today) {
-        List<Sip> dueSips = sipDao.findDueForExecution(today);
+        List<Sip> batch = sipDao.claimDueSipsForExecution(today, BATCH_SIZE);
         List<SipInstallment> results = new ArrayList<>();
 
-        for (Sip sip : dueSips) {
+        for (Sip sip : batch) {
             try {
-                SipInstallment installment = executeSingleSip(sip.getId(), today);
+                SipInstallment installment = executeSingleSip(sip, today);
                 results.add(installment);
             } catch (PhonePeRuntimeException e) {
                 log.error("Failed to execute SIP {}: {}", sip.getId(), e.getError().getDescription());
@@ -48,17 +59,13 @@ public class SipExecutionService {
         return results;
     }
 
-    @Transactional
-    public SipInstallment executeSingleSip(String sipId, LocalDate executionDate) {
-        // re-fetch inside transaction for locking (Postgres DAO uses FOR UPDATE)
-        Sip sip = sipDao.findByIdForUpdate(sipId)
-                .orElseGet(() -> sipDao.findById(sipId)
-                        .orElseThrow(() -> new PhonePeRuntimeException(
-                                org.example.exception.SipError.SIP_NOT_FOUND)));
+    private SipInstallment executeSingleSip(Sip sip, LocalDate executionDate) {
+        // rows are already locked by claimDueSipsForExecution — no need for findByIdForUpdate
 
         MutualFund fund = mutualFundDao.findById(sip.getFundId())
                 .orElseThrow(() -> new PhonePeRuntimeException(FundError.FUND_NOT_FOUND));
 
+        String sipId = sip.getId();
         BigDecimal amount = sip.getAmount();
         BigDecimal nav = fund.getCurrentNav();
 

@@ -56,6 +56,13 @@ public class PostgresSipDao implements SipDao {
     }
 
     @Override
+    public List<Sip> claimDueSipsForExecution(LocalDate date, int batchSize) {
+        return jpaRepo.claimDueSipsForExecution(date, batchSize).stream()
+                .map(SipEntity::toDomain)
+                .toList();
+    }
+
+    @Override
     public void update(Sip sip) {
         jpaRepo.save(SipEntity.fromDomain(sip));
     }

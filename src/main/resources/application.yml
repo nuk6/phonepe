@@ -21,11 +21,14 @@ resilience4j:
 
   # RETRY — transient failures (network blip, 503)
   # Retries the call before giving up. Safe because of idempotency keys.
+  # Exponential backoff: 500ms → 1s → 2s (prevents retry storms)
   retry:
     instances:
       paymentGateway:
         max-attempts: 3                                  # original + 2 retries
-        wait-duration: 500ms                             # wait between retries
+        wait-duration: 500ms                             # initial wait
+        enable-exponential-backoff: true                 # doubles each retry
+        exponential-backoff-multiplier: 2                # 500ms → 1s → 2s
         retry-exceptions:
           - java.lang.RuntimeException
 
