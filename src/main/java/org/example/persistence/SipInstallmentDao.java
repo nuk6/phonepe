@@ -8,6 +8,8 @@ public interface SipInstallmentDao {
 
     void save(SipInstallment installment);
 
+    void update(SipInstallment installment);
+
     List<SipInstallment> findBySipId(String sipId);
 }
 

@@ -24,6 +24,11 @@ public class InMemorySipInstallmentDao implements SipInstallmentDao {
     }
 
     @Override
+    public void update(SipInstallment installment) {
+        store.put(installment.getId(), installment);
+    }
+
+    @Override
     public List<SipInstallment> findBySipId(String sipId) {
         return store.values().stream()
                 .filter(inst -> inst.getSipId().equals(sipId))

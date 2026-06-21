@@ -2,26 +2,28 @@ package org.example.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.model.enums.InstallmentStatus;
-import org.example.exception.FundError;
-import org.example.exception.PaymentError;
-import org.example.exception.PhonePeRuntimeException;
-import org.example.model.MutualFund;
 import org.example.model.Sip;
 import org.example.model.SipInstallment;
-import org.example.persistence.MutualFundDao;
-import org.example.persistence.SipDao;
-import org.example.persistence.SipInstallmentDao;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+/**
+ * Orchestrator — deliberately NOT @Transactional.
+ *
+ * Each SIP execution follows a 3-phase protocol that safely coordinates
+ * the external payment call with local DB state:
+ *
+ *   Phase 1 (own txn): save installment as PENDING
+ *   Phase 2 (no txn):  call payment gateway
+ *   Phase 3 (own txn): finalize as SUCCESS or FAILED
+ *
+ * If the app crashes between phases, a reconciliation job can find
+ * PENDING installments and query the payment gateway by idempotency key
+ * to learn the true outcome.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -29,9 +31,7 @@ public class SipExecutionService {
 
     private static final int BATCH_SIZE = 50;
 
-    private final SipDao sipDao;
-    private final SipInstallmentDao installmentDao;
-    private final MutualFundDao mutualFundDao;
+    private final SipExecutionHelper helper;
     private final PaymentGateway paymentGateway;
 
     /**
@@ -42,17 +42,16 @@ public class SipExecutionService {
      * Single batch per call. If there are more due SIPs than BATCH_SIZE,
      * the next scheduler tick (or another instance) picks them up.
      */
-    @Transactional
     public List<SipInstallment> executeAllDueSips(LocalDate today) {
-        List<Sip> batch = sipDao.claimDueSipsForExecution(today, BATCH_SIZE);
+        List<Sip> batch = helper.claimBatch(today, BATCH_SIZE);
         List<SipInstallment> results = new ArrayList<>();
 
         for (Sip sip : batch) {
             try {
                 SipInstallment installment = executeSingleSip(sip, today);
                 results.add(installment);
-            } catch (PhonePeRuntimeException e) {
-                log.error("Failed to execute SIP {}: {}", sip.getId(), e.getError().getDescription());
+            } catch (Exception e) {
+                log.error("Failed to execute SIP {}: {}", sip.getId(), e.getMessage());
             }
         }
 
@@ -60,55 +59,21 @@ public class SipExecutionService {
     }
 
     private SipInstallment executeSingleSip(Sip sip, LocalDate executionDate) {
-        // rows are already locked by claimDueSipsForExecution — no need for findByIdForUpdate
+        // Phase 1: persist PENDING installment (committed independently)
+        SipInstallment pending = helper.savePendingInstallment(sip, executionDate);
 
-        MutualFund fund = mutualFundDao.findById(sip.getFundId())
-                .orElseThrow(() -> new PhonePeRuntimeException(FundError.FUND_NOT_FOUND));
+        // Phase 2: call payment gateway (NO transaction — external side effect)
+        boolean paid = paymentGateway.initiatePayment(
+                sip.getUserId(), sip.getAmount(), pending.getIdempotencyKey());
 
-        String sipId = sip.getId();
-        BigDecimal amount = sip.getAmount();
-        BigDecimal nav = fund.getCurrentNav();
-
-        // idempotency key = sipId + installmentCount — deterministic, prevents double-charge
-        String idempotencyKey = sipId + "_" + sip.getInstallmentCount();
-
-        boolean paid = paymentGateway.initiatePayment(sip.getUserId(), amount, idempotencyKey);
+        // Phase 3: finalize based on payment outcome (committed independently)
         if (!paid) {
-            SipInstallment failed = buildInstallment(sipId, amount, nav,
-                    BigDecimal.ZERO, executionDate, InstallmentStatus.FAILED, idempotencyKey);
-            installmentDao.save(failed);
-            throw new PhonePeRuntimeException(PaymentError.PAYMENT_FAILED);
+            helper.finalizeFailure(pending);
+            log.error("Payment failed for SIP {} installment {}", sip.getId(), pending.getId());
+            return pending;
         }
 
-        BigDecimal units = amount.divide(nav, 4, RoundingMode.HALF_UP);
-        SipInstallment installment = buildInstallment(sipId, amount, nav,
-                units, executionDate, InstallmentStatus.SUCCESS, idempotencyKey);
-        installmentDao.save(installment);
-
-        sip.incrementInstallmentCount();
-        applyStepUp(sip);
-        sip.setNextExecutionDate(SipService.computeNextDate(executionDate, sip.getMode()));
-        sipDao.update(sip);
-
-        log.info("Executed SIP {} | amount={} | nav={} | units={}", sipId, amount, nav, units);
-        return installment;
-    }
-
-    private void applyStepUp(Sip sip) {
-        double pct = sip.getStepUpPercentage();
-        if (pct <= 0) {
-            return;
-        }
-        BigDecimal multiplier = BigDecimal.valueOf(1 + pct / 100.0);
-        BigDecimal newAmount = sip.getAmount().multiply(multiplier).setScale(2, RoundingMode.HALF_UP);
-        sip.setAmount(newAmount);
-    }
-
-    private SipInstallment buildInstallment(String sipId, BigDecimal amount, BigDecimal nav,
-                                            BigDecimal units, LocalDate date,
-                                            InstallmentStatus status, String idempotencyKey) {
-        return new SipInstallment(UUID.randomUUID().toString(), sipId, amount,
-                nav, units, date, status, idempotencyKey);
+        return helper.finalizeSuccess(pending, sip, executionDate);
     }
 }
 

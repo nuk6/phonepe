@@ -17,7 +17,8 @@ public class SipInstallment {
     private final String sipId;
     private final BigDecimal amount;
     private final BigDecimal nav;
-    private final BigDecimal unitsAllotted;
+    @Setter
+    private BigDecimal unitsAllotted;
     private final LocalDate executionDate;
     @Setter
     private InstallmentStatus status;

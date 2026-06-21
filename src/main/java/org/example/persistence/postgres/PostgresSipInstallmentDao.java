@@ -22,6 +22,11 @@ public class PostgresSipInstallmentDao implements SipInstallmentDao {
     }
 
     @Override
+    public void update(SipInstallment installment) {
+        jpaRepo.save(SipInstallmentEntity.fromDomain(installment));
+    }
+
+    @Override
     public List<SipInstallment> findBySipId(String sipId) {
         return jpaRepo.findBySipId(sipId).stream()
                 .map(SipInstallmentEntity::toDomain)

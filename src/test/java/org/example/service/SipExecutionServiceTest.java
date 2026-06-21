@@ -39,7 +39,8 @@ class SipExecutionServiceTest {
         PaymentGateway pg = (userId, amount, key) -> paymentShouldSucceed;
 
         sipService = new SipService(sipDao, installmentDao, fundDao, userDao, pg);
-        executionService = new SipExecutionService(sipDao, installmentDao, fundDao, pg);
+        SipExecutionHelper helper = new SipExecutionHelper(sipDao, installmentDao, fundDao);
+        executionService = new SipExecutionService(helper, pg);
 
         userDao.save(new User("u1", "Amit"));
         fundDao.save(new MutualFund("f1", "SBI Bluechip", MutualFundCategory.EQUITY, new BigDecimal("100.00")));
@@ -135,10 +136,11 @@ class SipExecutionServiceTest {
         paymentShouldSucceed = false;
 
         List<SipInstallment> result = executionService.executeAllDueSips(start);
-        // execution swallows the exception, returns empty
-        assertTrue(result.isEmpty());
+        // failed installment is still returned (with FAILED status)
+        assertEquals(1, result.size());
+        assertEquals(InstallmentStatus.FAILED, result.get(0).getStatus());
 
-        // but a FAILED installment should still be recorded
+        // FAILED installment should be recorded in the DB
         List<SipInstallment> saved = installmentDao.findBySipId(sip.getId());
         assertEquals(1, saved.size());
         assertEquals(InstallmentStatus.FAILED, saved.get(0).getStatus());
